@@ -18,41 +18,41 @@ app.controller('StudentViewCtrl', function($scope, $window, $location, $http){
   $scope.question = ""
   
   $scope.addQuestion = function() {
-    $http.post('http://127.0.0.1:8000/slides/lecture/question/', $scope.question).success(function(data){
+    $http.post(url.concat('/slides/lecture/question/'), $scope.question).success(function(data){
       $scope.update_question();
     });
     $scope.question = '';
   };
 
   $scope.upvote = function(pk) {
-    $http.get('http://127.0.0.1:8000/slides/lecture/qvote/'+pk).success(function(data){
+    $http.get(url.concat('/slides/lecture/qvote/')+pk).success(function(data){
       $scope.update_question();
     });
   };
   $scope.update_question = function(){
     console.log('update q called')
-    $http.get('http://127.0.0.1:8000/slides/lecture/get_page_questions/').success(function(data){
+    $http.get(url.concat('/slides/lecture/get_page_questions/')).success(function(data){
        $scope.ques = eval(data)
     });
   };
   $scope.happy = function(){
-    return $http.get('http://127.0.0.1:8000/slides/lecture/vote_up/');
+    return $http.get(url.concat('/slides/lecture/vote_up/'));
   };
   $scope.unhappy = function(){
-    return $http.get('http://127.0.0.1:8000/slides/lecture/vote_down/');
+    return $http.get(url.concat('/slides/lecture/vote_down/'));
   };
   $scope.get_mood = function(){
-    return $http.get('http://127.0.0.1:8000/slides/lecture/get_mood/');
+    return $http.get(url.concat('/slides/lecture/get_mood/'));
   };
   $scope.prev = function(){
-    return $http.get('http://127.0.0.1:8000/slides/lecture/go_prev_page/');
+    return $http.get(url.concat('/slides/lecture/go_prev_page/'));
   };
   $scope.next = function(){
-    return $http.get('http://127.0.0.1:8000/slides/lecture/go_next_page/');
+    return $http.get(url.concat('/slides/lecture/go_next_page/'));
   };
   $scope.follow = function(){
     if ($scope.toggle_follow) {
-      return $http.get('http://127.0.0.1:8000/slides/lecture/go_curr_page/');
+      return $http.get(url.concat('/slides/lecture/go_curr_page/'));
     }
     else {
       return 0;

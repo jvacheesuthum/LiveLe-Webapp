@@ -21,12 +21,12 @@ app.controller('ClickerCtrl', function($scope, $window, $location, $http, AuthSe
     );
   };
   $scope.next = function () {
-    $http.get('http://127.0.0.1:8000/slides/clicker_next/');
+    $http.get(url.concat('/slides/clicker_next/'));
   };
   $scope.prev = function () {
-    $http.get('http://127.0.0.1:8000/slides/clicker_prev/');
+    $http.get(url.concat('/slides/clicker_prev/'));
   };
   $scope.menu = function () {
-    $http.get('http://127.0.0.1:8000/slides/clicker_menu/');
+    $http.get(url.concat('/slides/clicker_menu/'));
   };
 });

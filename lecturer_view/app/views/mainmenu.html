@@ -25,6 +25,20 @@
         <div> 
       </div> 
     </div>
+
+<!--
+      <div>
+         <input type = "file" file-model = "myFile" enctype="multipart/form-data"/>
+         <button ng-click = "uploadFile()">Upload</button>
+      </div>
+-->
+
+  <form id="search" action="http://146.169.47.210:8000/slides/upload/" method="post" enctype="multipart/form-data">
+    <input type= "text" name="filename" placeholder="Lecture"/>
+    <input type= "file" name="pdffile"/>
+    <input type= "submit" value="Upload"/>
+  </form>
+
   </div>
   <div id="extras" style="position:absolute; bottom:0px; right:0px; border-style:dotted;">
     <a href="http://127.0.0.1:8000/slides/login"> gogogo </a>
@@ -35,4 +49,11 @@
     <p>Username: {{ username }} </p>
     <a ng-click="logout()" class="btn btn-primary">Logout</a>
   </div>
+
+  <script>
+    $('#search').on('submit', function() {
+      var searchtoken = localStorage.getItem('token');
+      $('#search').attr('action', formAction+searchtoken);
+    });
+  </script>
 </section>

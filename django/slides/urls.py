@@ -6,6 +6,7 @@ from . import views
 
 app_name = 'slides'
 urlpatterns = [
+    url(r'^upload/(?P<token>[a-zA-Z0-9_]+)', views.upload),
     url(r'^api/register/$', views.register),
     url(r'^api/login/$', views.login),
     url(r'^api/logout/$', views.logout),

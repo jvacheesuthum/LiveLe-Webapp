@@ -22,7 +22,7 @@ app.controller('LectureCtrl', function($scope, $window, $location, $http){
   var ctrl = $scope;
   $scope.update_question = function(){
     console.log('update q called')
-    $http.get('http://127.0.0.1:8000/slides/lecture/show_questions/').success(function(data){
+    $http.get(url.concat('/slides/lecture/show_questions/')).success(function(data){
       ctrl.ques = eval(data)
     });
   };
@@ -38,10 +38,10 @@ app.controller('LectureCtrl', function($scope, $window, $location, $http){
     ctrl.clicked = true;
   };
   $scope.prev = function(){
-    return $http.get('http://127.0.0.1:8000/slides/lecture/go_prev_page/');
+    return $http.get(url.concat('/slides/lecture/go_prev_page/'));
   };
   $scope.next = function(){
-    return $http.get('http://127.0.0.1:8000/slides/lecture/go_next_page/');
+    return $http.get(url.concat('/slides/lecture/go_next_page/'));
   };
   $scope.goto_questions = function (){
     $location.path('/questions');

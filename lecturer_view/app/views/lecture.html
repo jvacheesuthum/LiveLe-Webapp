@@ -110,7 +110,8 @@ var al = function al(){
     <!-- websocket control -->
     <script>
       console.log('websocket.js used');
-      var socket = new WebSocket('ws://127.0.0.1:8000/user/'+localStorage.getItem('token')+'/');
+//      var socket = new WebSocket('ws://127.0.0.1:8000/user/'+localStorage.getItem('token')+'/');
+      var socket = new WebSocket('ws://146.169.47.210:8000/user/'+localStorage.getItem('token')+'/');
       socket.onmessage = function(message){
         var scope = angular.element(document.getElementById('lecturer_view')).scope();
         var data = JSON.parse(message.data);
@@ -154,7 +155,7 @@ var x = function(){alert(angular.element(document.getElementById('lecturer_view'
   // If absolute URL from the remote server is provided, configure the CORS
   // header on that server.
   //
-  var url = 'http://127.0.0.1:8000/slides/get_pdf/';
+  var url1 = url.concat('/slides/get_pdf/');
 
 
   //
@@ -181,7 +182,7 @@ var x = function(){alert(angular.element(document.getElementById('lecturer_view'
 
       // adding token header to pdfjs request
       var docInitParams = new Object();
-      docInitParams.url = url;
+      docInitParams.url = url1;
       docInitParams.httpHeaders = {"Authorization":"Token "+localStorage.getItem('token')};
 
   /**

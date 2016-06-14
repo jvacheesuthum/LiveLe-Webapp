@@ -5,7 +5,7 @@ from channels import Group as Channel_Group
 from django.shortcuts import get_object_or_404
 import os
 from django.forms import ModelForm
-
+from django import forms
 import binascii
 
 # Create your models here.
@@ -55,6 +55,7 @@ class PDFForm(ModelForm):
     class Meta:
         model = PDF
         fields = ['pdffile', 'filename']
+
 
 class Current(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, default = 1)

@@ -26,17 +26,17 @@ app.controller('StudentMainmenuCtrl', function($scope, $window, $location, $http
   var ctrl = $scope;
 
   $scope.getjson = function(){
-    $http.get('http://127.0.0.1:8000/slides/returnsomejson/').success(function(data){
+    $http.get(url.concat('/slides/returnsomejson/')).success(function(data){
       ctrl.json = data;
     });
   };
   $scope.getleclist = function(name){
-    $http.get('http://127.0.0.1:8000/slides/lecture_list/'+course).success(function(data){
+    $http.get(url.concat('/slides/lecture_list/')+course).success(function(data){
      ctrl.lecture_list = eval(data);
     });
    };
   $scope.select_slide = function(pk){
-    $http.get('http://127.0.0.1:8000/slides/select_lecture/'+pk).success(function(data){
+    $http.get(url.concat('/slides/select_lecture/')+pk).success(function(data){
       // this will jump to another html section with another controller so it will not know about this pk
       $location.path('/student_view');
     });
@@ -45,13 +45,13 @@ app.controller('StudentMainmenuCtrl', function($scope, $window, $location, $http
 
   $scope.course_list = []
   $scope.getcourses = function(){
-    $http.get('http://127.0.0.1:8000/slides/course_list/').success(function(data){
+    $http.get(url.concat('/slides/course_list/')).success(function(data){
      ctrl.course_list = eval(data);
     });
   }
   $scope.select_course = function(course){
     //TODO make api below
-    $http.get('http://127.0.0.1:8000/slides/lecture_list/'+course).success(function(data){
+    $http.get(url.concat('/slides/lecture_list/')+course).success(function(data){
      ctrl.lecture_list = eval(data);
     });
   }
