@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="styles/student_view.css">
-<div id="student_view" ng-controller="StudentViewCtrl">
+<div id="student_view" ng-controller="StudentViewCtrl" ng-init="check_speed()">
     <!-- Top half -->
-    <div class="row" ng-init="update_question()">
+    <div class="row" ng-init="update_question();ready=true; check_speed()">
       <div class="col-lg-6">
         <canvas id="pdfviewer"></canvas>
         <div class="Buttons">
@@ -26,8 +26,9 @@
         <div class="Vote-Buttons">
           <a class="btn btn-info" style="color:#1a3740;" ng-click="happy()"><i class="fa fa-smile-o fa-3x" aria-hidden="true"></i></a>
           <a class="btn btn-warning" style="color:#5a411e;" ng-click="unhappy()"><i class="fa fa-frown-o fa-3x" aria-hidden="true"></i></a>
-          <button ng-click="toggle_follow_toggle()">Too Slow</button>
-          <button ng-click="slow">Too Fast</button>
+          <a class="btn btn-primary" ng-class="{red:fast_clicked}" ng-click="fast()"><i class="fa fa-bolt fa-3x" aria-hidden="true" style="width:35px; height: 40px; text-align: center"></i></a>
+          <a class="btn btn-primary" ng-class="{red:slow_clicked}" ng-click="slow()"><i class="fa fa-hourglass-half fa-3x" aria-hidden="true" style="width:35px; height: 40px; text-align: center"></i></a>
+          <a class="btn btn-primary" ng-click="student_backhome()" style="float: right"><i class="fa fa-home fa-3x" aria-hidden="true"></i></a>
         </div>
         <div class="Bar-Container">
           <p class="lead">Current class status</p>
@@ -62,11 +63,14 @@
       socket.onmessage = function(message){
         var data = JSON.parse(message.data);
         if(data.type == 'bar'){
-          document.getElementById('red_bar').style.width = data.red_bar + '%';
-          document.getElementById('green_bar').style.width = data.green_bar + '%';
+          if (data.page == pageNum){
+            document.getElementById('red_bar').style.width = data.red_bar + '%';
+            document.getElementById('green_bar').style.width = data.green_bar + '%';
+          }
         }
         if(data.type == 'question'){
           // call controller function: update_question()
+          var scope = angular.element(document.getElementById('student_view')).scope();
           scope.$apply(function(){
             scope.update_question();
           });
@@ -173,7 +177,11 @@
       scope.prev().success(function(data){
        pageNum = data.page
        queueRenderPage(pageNum);
-       scope.update_question()
+       scope.update_question();
+        scope.get_mood().success(function(data){
+            document.getElementById('red_bar').style.width = data.bad + '%';
+            document.getElementById('green_bar').style.width = data.good + '%';
+        });
        console.log('prev');
       });
   });
@@ -192,7 +200,11 @@
       scope.next().success(function(data){
        pageNum = data.page
        queueRenderPage(pageNum);
-       scope.update_question()
+       scope.update_question();
+        scope.get_mood().success(function(data){
+            document.getElementById('red_bar').style.width = data.bad + '%';
+            document.getElementById('green_bar').style.width = data.good + '%';
+        });
        console.log('next');
       });
   });
@@ -206,7 +218,11 @@
         scope.follow().success(function(data){
           pageNum = data.page
           queueRenderPage(pageNum);
-          scope.update_question()
+          scope.update_question();
+          scope.get_mood().success(function(data){
+            document.getElementById('red_bar').style.width = data.bad + '%';
+            document.getElementById('green_bar').style.width = data.good + '%';
+          });
           console.log('follow');
         });
       });
@@ -227,7 +243,19 @@
    */
   PDFJS.getDocument(docInitParams).then(function (pdfDoc_) {
     pdfDoc = pdfDoc_;
-    renderPage(pageNum);
+    var scope = angular.element(document.getElementById('student_view')).scope();
+    scope.$apply(function(){
+      scope.curr().success(function(data){
+       pageNum = data.page
+       renderPage(pageNum);
+       console.log('init page = '+ pageNum);
+        scope.get_mood().success(function(data){
+            document.getElementById('red_bar').style.width = data.bad + '%';
+            document.getElementById('green_bar').style.width = data.good + '%';
+        });
+       console.log('init');
+      });
+    });
   });
 </script>
 

@@ -7,6 +7,9 @@ app.controller('StudentViewCtrl', function($scope, $window, $location, $http){
   $scope.right_hover = false;
   $scope.current = false;
   $scope.toggle_follow = true;
+  //fast/slow needs to get from backend not false
+  $scope.fast_clicked = false;
+  $scope.slow_clicked = false;
 
   $scope.backhome = function(){
     $location.path('/mainmenu');
@@ -15,7 +18,7 @@ app.controller('StudentViewCtrl', function($scope, $window, $location, $http){
 
   $scope.ques = [];
 
-  $scope.question = ""
+  $scope.question = ''
   
   $scope.addQuestion = function() {
     $http.post(url.concat('/slides/lecture/question/'), $scope.question).success(function(data){
@@ -26,7 +29,7 @@ app.controller('StudentViewCtrl', function($scope, $window, $location, $http){
 
   $scope.upvote = function(pk) {
     $http.get(url.concat('/slides/lecture/qvote/')+pk).success(function(data){
-      $scope.update_question();
+//      $scope.update_question();
     });
   };
   $scope.update_question = function(){
@@ -35,14 +38,50 @@ app.controller('StudentViewCtrl', function($scope, $window, $location, $http){
        $scope.ques = eval(data)
     });
   };
+  $scope.student_backhome = function(){
+    $location.path('/student_mainmenu');
+  };
+
   $scope.happy = function(){
     return $http.get(url.concat('/slides/lecture/vote_up/'));
   };
   $scope.unhappy = function(){
     return $http.get(url.concat('/slides/lecture/vote_down/'));
   };
+  $scope.check_speed = function(){
+    $http.get('http://127.0.0.1:8000/slides/lecture/check_speed/').success(function(data){
+       var st = eval(data);
+       if(st.speed == 0){
+         ctrl.fast_clicked = false;
+         ctrl.slow_clicked = false;
+       }else if(st.speed == 1){
+         ctrl.fast_clicked = false;
+         ctrl.slow_clicked = true;
+       }else if(st.speed == 2){
+         ctrl.fast_clicked = true;
+         ctrl.slow_clicked = false;
+       }
+    });
+  };
+  $scope.slow = function(){
+    ctrl.slow_clicked = !ctrl.slow_clicked;
+    if(ctrl.fast_clicked){
+      ctrl.fast_clicked = false;
+    }
+    return $http.get('http://127.0.0.1:8000/slides/lecture/too_slow/');
+  };
+  $scope.fast = function(){
+    ctrl.fast_clicked = !ctrl.fast_clicked;
+    if(ctrl.slow_clicked){
+      ctrl.slow_clicked = false;
+    }
+    return $http.get('http://127.0.0.1:8000/slides/lecture/too_fast/');
+  };
   $scope.get_mood = function(){
     return $http.get(url.concat('/slides/lecture/get_mood/'));
+  };
+  $scope.curr = function(){
+    return $http.get('http://127.0.0.1:8000/slides/lecture/get_curr_page/');
   };
   $scope.prev = function(){
     return $http.get(url.concat('/slides/lecture/go_prev_page/'));
@@ -53,6 +92,4 @@ app.controller('StudentViewCtrl', function($scope, $window, $location, $http){
   $scope.follow = function(){
       return $http.get(url.concat('/slides/lecture/go_curr_page/'));
   };
-  $scope.fast = false;
-  $scope.slow = false;
 });

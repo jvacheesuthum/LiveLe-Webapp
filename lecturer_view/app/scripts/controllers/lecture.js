@@ -19,6 +19,11 @@ app.controller('LectureCtrl', function($scope, $window, $location, $http){
   $scope.close_hover =false ;
   $scope.ques = [];
 
+  $scope.slow = 0;
+  $scope.fast = 0;
+  $scope.audience = 0;
+  $scope.fullscreen = false;
+
   var ctrl = $scope;
   $scope.update_question = function(){
     console.log('update q called')
@@ -43,7 +48,26 @@ app.controller('LectureCtrl', function($scope, $window, $location, $http){
   $scope.next = function(){
     return $http.get(url.concat('/slides/lecture/go_next_page/'));
   };
+  $scope.get_mood = function(){
+    return $http.get('http://127.0.0.1:8000/slides/lecture/get_mood/');
+  };
+  $scope.curr = function(){
+    return $http.get('http://127.0.0.1:8000/slides/lecture/get_curr_page/');
+  };
   $scope.goto_questions = function (){
     $location.path('/questions');
+  };
+  $scope.get_speed = function(){
+    $http.get('http://127.0.0.1:8000/slides/lecture/get_speed/').success(function(data){
+      var d = eval(data);
+      ctrl.slow  = d.slow;
+      ctrl.fast  = d.fast;
+      ctrl.audience = d.audience;
+    });
+  }
+  $scope.update_speed = function(slow,fast, audience){
+    ctrl.slow = slow;
+    ctrl.fast = fast; 
+    ctrl.audience = d.audience;
   }
 });

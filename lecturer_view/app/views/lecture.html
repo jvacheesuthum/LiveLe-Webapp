@@ -1,14 +1,14 @@
-<div id="lecturer_view" ng-controller="LectureCtrl" ng-init="update_question()">
+<div id="lecturer_view" ng-controller="LectureCtrl" ng-init="update_question(); get_speed()">
     <!-- Top half -->
-    <div class="Top-Half">
-    
+    <div class="Top-Half" ng-class="{full:fullscreen}">
+      <div id="opacity_filter" ng-show="fullscreen"></div> 
       <div class="Left-Container" onclick="onPrevPage()" ng-class="{'Side-Hover' : left_hover}" 
                                   ng-mouseover="left_hover = true"
                                   ng-mouseleave="left_hover = false"
                                   >
         <div id="prev"><i class="fa fa-angle-left fa-2x" aria-hidden="true"></i></div>
       </div>
-      <canvas id="pdfviewer"></canvas>
+      <canvas id="pdfviewer" ng-class="{full:fullscreen}"></canvas>
       <div class="Right-Container" onclick="onNextPage()" ng-class="{'Side-Hover' : right_hover}" 
                                   ng-mouseover="right_hover = true"
                                   ng-mouseleave="right_hover = false"
@@ -45,16 +45,16 @@
             <p class="lead bigger-font"><u>summary</u></p>
             <div id="summary-container"> 
               <div class="summary-icon">
-                <i class="fa fa-diamond" style="font-size: 40px" aria-hidden="true"></i>
-                <p> super x14 </p>
+                <i class="fa fa-flash" style="font-size: 40px" aria-hidden="true"></i>
+                <p> too fast x {{fast}} </p>
               </div> 
               <div class="summary-icon">
-                <i class="fa fa-flash" style="font-size: 40px"aria-hidden="true"></i>
-                <p> too fast x5 </p>
+                <i class="fa fa-hourglass-end" style="font-size: 40px"aria-hidden="true"></i>
+                <p> too slow x {{ slow }} </p>
               </div> 
               <div class="summary-icon">
-                <i class="fa fa-deaf" style="font-size: 40px"aria-hidden="true"></i>
-                <p> i'm lost x2 </p>
+                <i class="fa fa-users" style="font-size: 40px"aria-hidden="true"></i>
+                <p> audience x {{ audience }} </p>
               </div> 
             </div>
           </div>
@@ -73,7 +73,8 @@
         </div>
         <div id="menu-popup-navi-container" ng-mouseover="navi_hover=true"
                                             ng-mouseleave="navi_hover=false">
-          <div id="menu-popup-navi-inner" ng-class="{'menu-navi-hover': !navi_hover}">
+          <div id="menu-popup-navi-inner" ng-class="{'menu-navi-hover': !navi_hover}"
+                                          ng-click="clicked=false; fullscreen=true;">
           <p class="lead"><br /> <i class="fa fa-compass fa-2x" aria-hidden="true"></i> </p>
           </div>
         </div>
@@ -97,16 +98,8 @@
     <div class="Background-Dark" ng-show="clicked"></div>
 </div>
 
-    <script> 
-// example of calling controller function from outside controller, click left to try
-var al = function al(){
-  var scope = angular.element(document.getElementById('lecturer_view')).scope();
-  scope.$apply(function(){
-    scope.click('x');
-  });
-}
 
-    </script>
+
     <!-- websocket control -->
     <script>
       console.log('websocket.js used');
@@ -120,7 +113,12 @@ var al = function al(){
             onNextPage();
           } else if(data.nav == 'prev'){
             onPrevPage();
-          } else if(data.nav == 'menu'){
+          } else if(data.nav == 'full'){
+            scope.$apply(function(){
+              scope.fullscreen = !scope.fullscreen;
+            });
+          } 
+          else if(data.nav == 'menu'){
             scope.$apply(function(){
               scope.clicked = !scope.clicked;
             });
@@ -129,6 +127,9 @@ var al = function al(){
         if(data.type == 'bar'){
           document.getElementById('red_bar').style.width = data.red_bar + '%';
           document.getElementById('green_bar').style.width = data.green_bar + '%';
+
+          var ratio_good = data.red_bar/(data.red_bar+data.green_bar);
+          document.getElementById('opacity_filter').style.opacity = ratio_good*2/3;
         }
         if(data.type == 'question'){
           // call controller function: update_question()
@@ -136,17 +137,17 @@ var al = function al(){
             scope.update_question();
           });
         }
-        if(data.type == 'summary'){
-          // call controller function: update_summary(data.summary)
+        if(data.type == 'speed'){
+            //data.fast , data.slow
+          scope.$apply(function(){
+            scope.update_speed(data.slow, data.fast, data.audience);
+          });
         }
         if(data.type == 'nav'){
           // ignore
         }
       }
     </script>
-  <script>
-var x = function(){alert(angular.element(document.getElementById('lecturer_view')).scope().clicked);};
-  </script>
 
       
   <!-- pdf control -->
@@ -241,7 +242,13 @@ var x = function(){alert(angular.element(document.getElementById('lecturer_view'
       scope.prev().success(function(data){
        pageNum = data.page
        queueRenderPage(pageNum);
-       console.log('prev');
+        scope.get_mood().success(function(data){
+            document.getElementById('red_bar').style.width = data.bad + '%';
+            document.getElementById('green_bar').style.width = data.good + '%';
+            var ratio_good = data.bad/(data.bad+data.good);
+            document.getElementById('opacity_filter').style.opacity = ratio_good*2/3;
+          });
+         console.log('prev');
       });
   });
   }
@@ -259,6 +266,12 @@ var x = function(){alert(angular.element(document.getElementById('lecturer_view'
       scope.next().success(function(data){
        pageNum = data.page
        queueRenderPage(pageNum);
+        scope.get_mood().success(function(data){
+            document.getElementById('red_bar').style.width = data.bad + '%';
+            document.getElementById('green_bar').style.width = data.good + '%';
+            var ratio_good = data.bad/(data.bad+data.good);
+            document.getElementById('opacity_filter').style.opacity = ratio_good*2/3;
+        });
        console.log('next');
       });
   });
@@ -269,12 +282,40 @@ var x = function(){alert(angular.element(document.getElementById('lecturer_view'
    */
   PDFJS.getDocument(docInitParams).then(function (pdfDoc_) {
     pdfDoc = pdfDoc_;
-    renderPage(pageNum);
+    var scope = angular.element(document.getElementById('lecturer_view')).scope();
+    scope.$apply(function(){
+      scope.curr().success(function(data){
+       pageNum = data.page
+       renderPage(pageNum);
+       console.log('init page = '+ pageNum);
+        scope.get_mood().success(function(data){
+            document.getElementById('red_bar').style.width = data.bad + '%';
+            document.getElementById('green_bar').style.width = data.good + '%';
+            var ratio_good = data.bad/(data.bad+data.good);
+            document.getElementById('opacity_filter').style.opacity = ratio_good*2/3;
+        });
+       console.log('init');
+      });
+    });
   });
 </script>
-    <!-- mousetrap control -->
-    <!--script>
-      Mousetrap.bind(['right','space'], onNextPage());
-      Mousetrap.bind('left', onPrevPage());
-    </script-->
+
+<!-- mousetrap control -->
+<script>
+  var MT_on_next = function(){
+    onNextPage();
+  };
+  var MT_on_prev = function(){
+    onPrevPage();
+  };
+  var MT_esc = function(){
+    var scope = angular.element(document.getElementById('lecturer_view')).scope();
+    scope.$apply(function(){
+      scope.fullscreen = false;
+    });
+  };
+  Mousetrap.bind(['right','space'], MT_on_next);
+  Mousetrap.bind('left', MT_on_prev);
+  Mousetrap.bind('esc', MT_esc);
+</script>
 

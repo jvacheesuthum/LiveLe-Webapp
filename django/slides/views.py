@@ -3,7 +3,7 @@ from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse;
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate, login
-from .models import Current, PDF, Votes, PDFForm, Question, QuestionForm, Question_Vote
+from .models import Current, PDF, Votes, PDFForm, Question, QuestionForm, Question_Vote, Speed
 from django.contrib.auth.models import User, Group
 from channels import Group as Channel_Group
 from django.conf import settings
@@ -23,6 +23,19 @@ from django.db import IntegrityError
 from .models import Token
 
 # Create your views here.
+@csrf_exempt
+@token_required
+def clicker_full(request):
+    current = get_object_or_404(Current, owner = request.token.user, active=1)
+    pdf = current.pdf
+    notification = {
+        "type": 'clicker',
+        "nav": 'full',
+    }
+    Channel_Group(str(pdf.pk)).send({
+       "text": json.dumps(notification),
+    })
+    return JsonResponse({'ack':False})
 
 @csrf_exempt
 @token_required
@@ -267,8 +280,8 @@ def get_mood(request):
             v = Votes(user = request.token.user, pdf = curr_pdf, page = current.page, value = 0)
             v.save()
 
-    good = Votes.objects.filter(pdf = curr_pdf, value = 0).count()
-    bad = Votes.objects.filter(pdf = curr_pdf,  value = 1).count()
+    good = Votes.objects.filter(pdf = curr_pdf, page=current.page, value = 0).count()
+    bad = Votes.objects.filter(pdf = curr_pdf, page=current.page, value = 1).count()
     total = good + bad
     if (total == 0):
         total = 1
@@ -279,8 +292,8 @@ def get_mood(request):
 def send_mood(pdf, page):
 # sends mood status as percentages
 
-    good = Votes.objects.filter(pdf = pdf, value = 0).count()
-    bad = Votes.objects.filter(pdf = pdf,  value = 1).count()
+    good = Votes.objects.filter(pdf = pdf, page=page, value = 0).count()
+    bad = Votes.objects.filter(pdf = pdf, page=page, value = 1).count()
     total = good + bad
     if (total == 0):
         total = 1
@@ -291,6 +304,50 @@ def send_mood(pdf, page):
         "page": page,
         "green_bar": good*100/total,
         "red_bar": bad*100/total,
+    }
+    Channel_Group(str(pdf.pk)).send({
+       "text": json.dumps(notification),
+    })
+
+@csrf_exempt
+@token_required
+def get_speed(request):
+# return speed status
+    current = get_object_or_404(Current, owner = request.token.user, active=1)
+
+    slow = Speed.objects.filter(pdf = current.pdf, value = 0).count()
+    fast = Speed.objects.filter(pdf = current.pdf, value = 1).count()
+    au = Current.objects.filter(pdf = current.pdf).count()
+    
+    return JsonResponse({'audience': au-1, 'slow': slow, 'fast': fast})
+
+@csrf_exempt
+@token_required
+def check_speed(request):
+# return speed status for this user. 0 is nothing, 1 is slow, 2 is fast.
+    current = get_object_or_404(Current, owner = request.token.user, active=1)
+
+    status = 0
+    try:
+        s = Speed.objects.get(user = request.token.user, pdf = current.pdf)
+        status = s.value +1
+    except Speed.DoesNotExist:
+        pass
+    
+    return JsonResponse({'speed': status})
+
+def send_speed(pdf):
+# sends speed status
+
+    slow = Speed.objects.filter(pdf = pdf, value = 0).count()
+    fast = Speed.objects.filter(pdf = pdf, value = 1).count()
+    au = Current.objects.filter(pdf = pdf).count()
+    
+    notification = {
+        "type": 'speed',
+        "audience": au-1,
+        "slow": slow,
+        "fast": fast,
     }
     Channel_Group(str(pdf.pk)).send({
        "text": json.dumps(notification),
@@ -393,6 +450,49 @@ def vote_down(request):
         pass    
     return JsonResponse({'ack':False})
 
+@csrf_exempt
+@token_required
+def too_slow(request):
+# user votes up on his current slide. 
+# returns true if voted, false otherwise.
+    current = get_object_or_404(Current, owner = request.token.user, active=1)
+
+    try:
+        s = Speed.objects.get(user = request.token.user, pdf = current.pdf)
+        if (s.value == 0):
+            s.delete()
+        else:
+            s.value = 0
+            s.save()
+    except Speed.DoesNotExist:
+        s = Speed(user = request.token.user, pdf = current.pdf, value = 0)
+        s.save()
+    send_speed(current.pdf)
+
+    return JsonResponse({'ack':True})
+
+
+@csrf_exempt
+@token_required
+def too_fast(request):
+# user votes up on his current slide. 
+# returns true if voted, false otherwise.
+    current = get_object_or_404(Current, owner = request.token.user, active=1)
+
+    try:
+        s = Speed.objects.get(user = request.token.user, pdf = current.pdf)
+        if (s.value == 1):
+            s.delete()
+        else:
+            s.value = 1
+            s.save()
+    except Speed.DoesNotExist:
+        s = Speed(user = request.token.user, pdf = current.pdf, value = 1)
+        s.save()
+    send_speed(current.pdf)
+
+    return JsonResponse({'ack':True})
+
 
 @csrf_exempt
 @token_required
@@ -435,7 +535,7 @@ def qvote(request, question):
         notification = {
             "type": 'question',
         }
-        Channel_Group(str(current.pdf.pk)).send({
+        Channel_Group(str(q.pdf.pk)).send({
             "text": json.dumps(notification),
         })
 
