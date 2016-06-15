@@ -4,6 +4,8 @@
       <div class="course_menu">
         <div class="course" ng-repeat="c in course_list track by c.pk"
                             ng-click="select_course(c.pk)"> {{ c.fields.name }} </div>
+      
+        <div class="course" ng-click="logout()" style="position: absolute; bottom:5%; padding-left: 35%; padding-right: 40%">Logout</div>
       </div>
     <div id="menu_con" class="content container row-centered">
 
@@ -25,14 +27,5 @@
         <div> 
       </div> 
     </div>
-  </div>
-  <div id="extras" style="position:absolute; bottom:0px; right:0px; border-style:dotted;">
-    <a href="http://127.0.0.1:8000/slides/login"> gogogo </a>
-    <a href="http://www.google.com"> gogogo </a>
-    <div ng-click="getjson()" class="red"> getjson </div>
-    {{ json }} <br>
-    {{ course_list}}
-    <p>Username: {{ username }} </p>
-    <a ng-click="logout()" class="btn btn-primary">Logout</a>
   </div>
 </section>
