@@ -23,7 +23,7 @@ app.controller('MainmenuCtrl', function($scope, $http, $window, $location, AuthS
   $scope.lecture_list = [];
   $scope.icon_hover = false;
   
-  $scope.current_course = "blah";
+  $scope.current_course = 'blah';
 
   var ctrl = $scope;
 

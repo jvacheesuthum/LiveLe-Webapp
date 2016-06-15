@@ -46,6 +46,6 @@ app.config(['$routeProvider','$httpProvider', function($routeProvider, $httpProv
     });
 }]);
 
-var url = "http://146.169.47.210:8000";
+var url = 'http://146.169.47.210:8000';
 //app.constant('API_SERVER', 'http://127.0.0.1:8000/slides/api/');
 app.constant('API_SERVER', url.concat('/slides/api/'));

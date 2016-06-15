@@ -1,10 +1,9 @@
   <div class="Background-White" ng-init="getcourses()">
 
-student mainmenu
-<a ng-click="logout()" class="btn btn-primary">Logout</a>
       <div class="course_menu">
         <div class="course" ng-repeat="c in course_list track by c.pk"
                             ng-click="select_course(c.pk)"> {{ c.fields.name }} </div>
+        <div class="course" ng-click="logout()" style="position: relative; top: 90%">Logout</div>
       </div>
     <div id="menu_con" class="content container row-centered">
 
