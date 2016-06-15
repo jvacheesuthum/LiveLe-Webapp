@@ -133,6 +133,27 @@ def course_index(request, course):
 '''
 
 @csrf_exempt
+def upload(request, course, token):
+    token = Token.objects.get(token=token)
+    course_group = Group.objects.get(name = course)
+    # Handle file upload
+    if request.method == 'POST':
+        form = PDFForm(request.POST, request.FILES)
+        if form.is_valid():
+          pdf = form.save(commit=False)
+          pdf.course = course_group
+          pdf.lecturer = token.user
+          pdf.save()
+            # Redirect to the document list after POST
+#          return JsonResponse({'ack':True})
+          return HttpResponseRedirect('http://146.169.47.210:9000/#/mainmenu/')
+        return JsonResponse({'ack':False})
+    else:
+        form = PDFForm()  # A empty, unbound form
+        return JsonResponse({'ack':False})
+
+
+@csrf_exempt
 @token_required
 def course_list(request):
 # returns a list of courses the user is subscribed to
