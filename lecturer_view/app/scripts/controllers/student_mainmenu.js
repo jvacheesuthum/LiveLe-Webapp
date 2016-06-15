@@ -50,7 +50,6 @@ app.controller('StudentMainmenuCtrl', function($scope, $window, $location, $http
     });
   }
   $scope.select_course = function(course){
-    //TODO make api below
     $http.get('http://127.0.0.1:8000/slides/lecture_list/'+course).success(function(data){
      ctrl.lecture_list = eval(data);
     });

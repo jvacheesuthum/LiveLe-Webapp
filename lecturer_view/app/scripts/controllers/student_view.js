@@ -37,6 +37,10 @@ app.controller('StudentViewCtrl', function($scope, $window, $location, $http){
        $scope.ques = eval(data)
     });
   };
+  $scope.student_backhome = function(){
+    $location.path('/student_mainmenu');
+  };
+
   $scope.happy = function(){
     return $http.get('http://127.0.0.1:8000/slides/lecture/vote_up/');
   };
