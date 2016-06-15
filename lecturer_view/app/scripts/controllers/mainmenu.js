@@ -22,6 +22,8 @@ app.controller('MainmenuCtrl', function($scope, $http, $window, $location, AuthS
   $scope.json = {'x': 'nothing'};
   $scope.lecture_list = [];
   $scope.icon_hover = false;
+  
+  $scope.current_course = "blah";
 
   var ctrl = $scope;
 
@@ -49,7 +51,8 @@ app.controller('MainmenuCtrl', function($scope, $http, $window, $location, AuthS
      ctrl.course_list = eval(data);
     });
   }
-  $scope.select_course = function(course){
+  $scope.select_course = function(course, course_name){
+    ctrl.current_course = course_name;
     $http.get(url.concat('/slides/lecture_list/')+course).success(function(data){
      ctrl.lecture_list = eval(data);
     });

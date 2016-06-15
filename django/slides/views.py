@@ -120,12 +120,10 @@ def course_index(request, course):
 '''
 
 @csrf_exempt
-def upload(request, token):
+def upload(request, course, token):
     token = Token.objects.get(token=token)
-    course_group = Group.objects.get(name = "Compilers")
+    course_group = Group.objects.get(name = course)
     # Handle file upload
-    print (request.POST)
-    print (request.FILES)
     if request.method == 'POST':
         form = PDFForm(request.POST, request.FILES)
         if form.is_valid():
@@ -434,6 +432,12 @@ def qvote(request, question):
     except Question_Vote.DoesNotExist:
         v = Question_Vote(user = request.token.user, question = q)
         v.save()
+        notification = {
+            "type": 'question',
+        }
+        Channel_Group(str(current.pdf.pk)).send({
+            "text": json.dumps(notification),
+        })
 
     return JsonResponse({'ack':question})
 

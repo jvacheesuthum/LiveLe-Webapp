@@ -1,11 +1,16 @@
-<section>
+<div id="lecturer_mainmenu" ng-controller="MainmenuCtrl"> 
   <div class="Background-White" ng-init="getcourses()">
 
       <div class="course_menu">
         <div class="course" ng-repeat="c in course_list track by c.pk"
-                            ng-click="select_course(c.pk)"> {{ c.fields.name }} </div>
+                            ng-click="select_course(c.pk,c.fields.name)"> {{ c.fields.name }} </div>
+  <form id="search" ng-show="current_course != 'blah'" action="http://146.169.47.210:8000/slides/upload/" method="post" enctype="multipart/form-data" style="position: relative; top: 80%">
+    <input type= "text" name="filename" placeholder="Lecture"/>
+    <input type= "file" name="pdffile"/>
+    <input type= "submit" value="Upload"/>
+  </form>
       </div>
-    <div id="menu_con" class="content container row-centered">
+    <div id="menu_con" class="content container row-centered" style="position: relative">
 
       <div class="mainmenu_icon col-md-4 col-sm-6" ng-repeat="each in lecture_list"
                                           ng-class="{grey: icon_hover}"
@@ -14,30 +19,14 @@
                                           ng-class="{grey: icon_hover}"
                                           ng-click="select_slide(each.pk)"-->
         <div class='inner_image'> 
-          <img class="icon_image" src='https://i.ytimg.com/vi/tntOCGkgt98/maxresdefault.jpg'> 
+          <img class="icon_image" src='http://icons.iconarchive.com/icons/dtafalonso/android-lollipop/512/Slides-icon.png'> 
         </div> 
-        <div class='headline'> 
+        <div class='headline' style="font-size: 18pt; text-align: center"> 
           {{each.fields.filename}}
         </div> 
-        <div style="float: left; background-color: red;"> info </div>
-        <div style="float: left; background-color: blue;"> start </div>
-        <div style="float: left; background-color: green;"> delete </div>
-        <div> 
       </div> 
     </div>
 
-<!--
-      <div>
-         <input type = "file" file-model = "myFile" enctype="multipart/form-data"/>
-         <button ng-click = "uploadFile()">Upload</button>
-      </div>
--->
-
-  <form id="search" action="http://146.169.47.210:8000/slides/upload/" method="post" enctype="multipart/form-data">
-    <input type= "text" name="filename" placeholder="Lecture"/>
-    <input type= "file" name="pdffile"/>
-    <input type= "submit" value="Upload"/>
-  </form>
 
   </div>
   <div id="extras" style="position:absolute; bottom:0px; right:0px; border-style:dotted;">
@@ -49,11 +38,15 @@
     <p>Username: {{ username }} </p>
     <a ng-click="logout()" class="btn btn-primary">Logout</a>
   </div>
-
+</div>
   <script>
     $('#search').on('submit', function() {
       var searchtoken = localStorage.getItem('token');
-      $('#search').attr('action', formAction+searchtoken);
+      var scope = angular.element(document.getElementById('lecturer_mainmenu')).scope();
+      var current_course = scope.current_course;
+      alert(current_course);
+      var formAction = $('#search').attr('action'); 
+     $('#search').attr('action', formAction+current_course+'/'+searchtoken);
     });
   </script>
 </section>

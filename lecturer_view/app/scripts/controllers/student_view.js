@@ -51,12 +51,7 @@ app.controller('StudentViewCtrl', function($scope, $window, $location, $http){
     return $http.get(url.concat('/slides/lecture/go_next_page/'));
   };
   $scope.follow = function(){
-    if ($scope.toggle_follow) {
       return $http.get(url.concat('/slides/lecture/go_curr_page/'));
-    }
-    else {
-      return 0;
-    }
   };
   $scope.fast = false;
   $scope.slow = false;
